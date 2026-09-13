@@ -1,0 +1,283 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+}
+
+nav {
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 7%;
+    background: #111827;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+}
+
+.hero {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 30px;
+    background: #1e293b;
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+h1 {
+    font-size: clamp(45px, 8vw, 80px);
+    margin: 25px 0;
+}
+
+h1 span {
+    color: #38bdf8;
+}
+
+.hero p {
+    color: #cbd5e1;
+    font-size: 19px;
+    line-height: 1.7;
+}
+
+.buttons {
+    margin-top: 35px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 14px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.primary {
+    background: #38bdf8;
+    color: #082f49;
+}
+
+.secondary {
+    border: 1px solid #475569;
+    color: white;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 50px 7%;
+}
+
+.card {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 18px;
+}
+
+.card h2 {
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #cbd5e1;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: #94a3b8;
+}
+
+@media (max-width: 700px) {
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    nav {
+        padding: 0 5%;
+    }
+
+    .nav-links {
+        gap: 12px;
+    }
+}
+
+form {
+    max-width: 420px;
+    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    background: #1e293b;
+    color: white;
+    font-size: 16px;
+}
+
+input::placeholder {
+    color: #94a3b8;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.dashboard {
+    max-width: 1000px;
+    margin: auto;
+    padding: 70px 20px;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+.dashboard-header h1 {
+    font-size: clamp(38px, 7vw, 65px);
+    margin: 20px 0;
+}
+
+.dashboard-header h1 span {
+    color: #38bdf8;
+}
+
+.dashboard-header p {
+    color: #cbd5e1;
+    font-size: 18px;
+}
+
+.task-form {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 40px;
+}
+
+.task-form h2 {
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: white;
+    font-size: 16px;
+    resize: vertical;
+}
+
+.tasks h2 {
+    margin-bottom: 20px;
+}
+
+.task-card {
+    background: #1e293b;
+    padding: 22px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+}
+
+.task-card h3 {
+    font-size: 21px;
+    margin-bottom: 8px;
+}
+
+.task-card p {
+    color: #cbd5e1;
+    margin-bottom: 8px;
+}
+
+.task-card small {
+    color: #64748b;
+}
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.task-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.danger {
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+}
+
+.empty {
+    text-align: center;
+    background: #1e293b;
+    padding: 50px;
+    border-radius: 18px;
+    color: #cbd5e1;
+}
+
+@media (max-width: 700px) {
+    .task-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .task-actions {
+        justify-content: stretch;
+    }
+
+    .task-actions .btn {
+        flex: 1;
+        text-align: center;
+    }
+}

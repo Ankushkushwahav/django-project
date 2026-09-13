@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Django API Tester</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial,sans-serif;
+    background:#eef2f7;
+}
+
+.box{
+    max-width:650px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 8px 30px #0002;
+}
+
+h1{text-align:center}
+
+input,textarea,button{
+    width:100%;
+    padding:13px;
+    margin:6px 0;
+    border-radius:9px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
+button{
+    background:#111827;
+    color:white;
+    border:0;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.task{
+    border:1px solid #ddd;
+    padding:14px;
+    margin:10px 0;
+    border-radius:12px;
+    background:#fafafa;
+}
+
+.task.done{
+    background:#dcfce7;
+}
+
+.actions{
+    display:flex;
+    gap:7px;
+}
+
+.actions button{
+    font-size:14px;
+}
+
+pre{
+    background:#111827;
+    color:#00ff88;
+    padding:15px;
+    border-radius:10px;
+    overflow:auto;
+    white-space:pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>🚀 Django API Tester</h1>
+
+<h2>Register</h2>
+
+<input id="regUser" placeholder="Username">
+<input id="regEmail" placeholder="Email">
+<input id="regPass" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+
+<input id="loginUser" placeholder="Username">
+<input id="loginPass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<h2>🔐 Token</h2>
+
+<textarea id="token" rows="3" placeholder="Token will appear here"></textarea>
+
+<h2>➕ Add Task</h2>
+
+<input id="taskTitle" placeholder="Task title">
+<textarea id="taskDesc" placeholder="Description"></textarea>
+
+<button onclick="addTask()">POST Task</button>
+
+
+<h2>👤 Account</h2>
+
+<button onclick="getProfile()">GET Profile</button>
+<button onclick="logout()">Logout</button>
+
+
+
+<h2>🔑 JWT Authentication</h2>
+
+<input id="jwtUser" placeholder="Username">
+<input id="jwtPass" type="password" placeholder="Password">
+
+<button onclick="jwtLogin()">JWT Login</button>
+
+<textarea id="accessToken" rows="3" placeholder="JWT Access Token"></textarea>
+
+<textarea id="refreshToken" rows="3" placeholder="JWT Refresh Token"></textarea>
+
+<button onclick="jwtGetTasks()">JWT GET Tasks</button>
+<button onclick="jwtGetTasksAuto()">JWT Auto GET Tasks</button>
+<button onclick="jwtRefresh()">Refresh JWT</button>
+<button onclick="jwtLogout()">JWT Logout</button>
+<button onclick="clearJWT()">Clear JWT</button>
+
+<h2>👤 Profile</h2>
+
+<button onclick="getProfile()">GET Profile</button>
+
+<input id="profileEmail" placeholder="New email">
+
+<button onclick="updateProfile()">Update Profile</button>
+
+<h2>🔐 Change Password</h2>
+
+<input id="oldPassword" type="password" placeholder="Current password">
+
+<input id="newPassword" type="password" placeholder="New password">
+
+<button onclick="changePassword()">Change Password</button>
+
+<h2>📋 My Tasks</h2>
+
+<button onclick="getTasks()">GET Tasks</button>
+
+<div id="tasks"></div>
+
+<h2>Response</h2>
+
+<pre id="output">Waiting...</pre>
+
+</div>
+
+<script>
+
+function show(data){
+    document.getElementById("output").textContent =
+        JSON.stringify(data,null,2);
+}
+
+function getToken(){
+    return document.getElementById("token").value.trim();
+}
+
+async function register(){
+
+    const response = await fetch("/api/register/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            username:document.getElementById("regUser").value,
+            email:document.getElementById("regEmail").value,
+            password:document.getElementById("regPass").value
+        })
+    });
+
+    const data = await response.json();
+
+    show(data);
+
+    if(data.token){
+        document.getElementById("token").value=data.token;
+    }
+}
+
+async function login(){
+
+    const response = await fetch("/api/login/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            username:document.getElementById("loginUser").value,
+            password:document.getElementById("loginPass").value
+        })
+    });
+
+    const data = await response.json();
+
+    show(data);
+
+    if(data.token){
+        document.getElementById("token").value=data.token;
+        await getTasks();
+    }
+}
+
+async function getTasks(){
+
+    const token=getToken();
+
+    const response=await fetch("/api/tasks/",{
+        headers:{
+            "Authorization":"Token "+token
+        }
+    });
+
+    const data=await response.json();
+
+    show(data);
+    displayTasks(data);
+}
+
+async function addTask(){
+
+    const token=getToken();
+
+    const response=await fetch("/api/tasks/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Token "+token
+        },
+        body:JSON.stringify({
+            title:document.getElementById("taskTitle").value,
+            description:document.getElementById("taskDesc").value
+        })
+    });
+
+    const data=await response.json();
+
+    show(data);
+
+    document.getElementById("taskTitle").value="";
+    document.getElementById("taskDesc").value="";
+
+    await getTasks();
+}
+
+async function updateTask(id,completed){
+
+    const token=getToken();
+
+    const response=await fetch("/api/tasks/"+id+"/",{
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Token "+token
+        },
+        body:JSON.stringify({
+            completed:completed
+        })
+    });
+
+    const data=await response.json();
+
+    show(data);
+    await getTasks();
+}
+
+async function editTask(id,title,description,completed){
+
+    const newTitle=prompt("Task title:",title);
+
+    if(newTitle===null)return;
+
+    const newDescription=prompt("Description:",description);
+
+    if(newDescription===null)return;
+
+    const token=getToken();
+
+    const response=await fetch("/api/tasks/"+id+"/",{
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Token "+token
+        },
+        body:JSON.stringify({
+            title:newTitle,
+            description:newDescription,
+            completed:completed
+        })
+    });
+
+    const data=await response.json();
+
+    show(data);
+    await getTasks();
+}
+
+async function deleteTask(id){
+
+    if(!confirm("Delete this task?"))return;
+
+    const token=getToken();
+
+    const response=await fetch("/api/tasks/"+id+"/",{
+        method:"DELETE",
+        headers:{
+            "Authorization":"Token "+token
+        }
+    });
+
+    if(response.status===204){
+        show({
+            message:"Task deleted successfully"
+        });
+    }else{
+        const data=await response.json();
+        show(data);
+    }
+
+    await getTasks();
+}
+
+function displayTasks(tasks){
+
+    const container=document.getElementById("tasks");
+
+    container.innerHTML="";
+
+    if(!tasks.length){
+        container.innerHTML="<p>No tasks found.</p>";
+        return;
+    }
+
+    tasks.forEach(task=>{
+
+        const div=document.createElement("div");
+
+        div.className="task "+(task.completed?"done":"");
+
+        div.innerHTML=`
+            <strong>${escapeHtml(task.title)}</strong>
+            <p>${escapeHtml(task.description || "")}</p>
+
+            <small>
+                ID: ${task.id}
+                |
+                ${task.completed ? "✅ Completed" : "⏳ Pending"}
+            </small>
+
+            <div class="actions">
+
+                <button onclick="updateTask(
+                    ${task.id},
+                    ${!task.completed}
+                )">
+                    ${task.completed ? "↩️ Undo" : "✅ Complete"}
+                </button>
+
+                <button onclick="editTask(
+                    ${task.id},
+                    '${escapeJs(task.title)}',
+                    '${escapeJs(task.description || "")}',
+                    ${task.completed}
+                )">
+                    ✏️ Edit
+                </button>
+
+                <button onclick="deleteTask(${task.id})">
+                    🗑️ Delete
+                </button>
+
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+function escapeHtml(text){
+
+    return String(text)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+function escapeJs(text){
+
+    return String(text)
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'")
+        .replace(/\n/g,"\\n")
+        .replace(/\r/g,"");
+}
+
+
+
+async function getProfile(){
+
+    const token=getToken();
+
+    const response=await fetch("/api/profile/",{
+        headers:{
+            "Authorization":"Token "+token
+        }
+    });
+
+    const data=await response.json();
+
+    show(data);
+}
+
+
+async function logout(){
+
+    const token=getToken();
+
+    const response=await fetch("/api/logout/",{
+        method:"POST",
+        headers:{
+            "Authorization":"Token "+token
+        }
+    });
+
+    const data=await response.json();
+
+    show(data);
+
+    if(response.ok){
+        document.getElementById("token").value="";
+        document.getElementById("tasks").innerHTML="";
+    }
+}
+
+
+
+async function getProfile(){
+
+    const token = getToken();
+
+    const response = await fetch("/api/profile/", {
+        headers: {
+            "Authorization": "Token " + token
+        }
+    });
+
+    const data = await response.json();
+
+    show(data);
+
+    if(data.email !== undefined){
+        document.getElementById("profileEmail").value = data.email;
+    }
+}
+
+
+async function updateProfile(){
+
+    const token = getToken();
+
+    const response = await fetch("/api/profile/update/", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + token
+        },
+        body: JSON.stringify({
+            email: document.getElementById("profileEmail").value
+        })
+    });
+
+    const data = await response.json();
+
+    show(data);
+}
+
+
+async function changePassword(){
+
+    const token = getToken();
+
+    const response = await fetch("/api/change-password/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + token
+        },
+        body: JSON.stringify({
+            old_password: document.getElementById("oldPassword").value,
+            new_password: document.getElementById("newPassword").value
+        })
+    });
+
+    const data = await response.json();
+
+    show(data);
+
+    if(response.ok){
+        document.getElementById("token").value = "";
+        alert("Password changed. Please login again.");
+    }
+}
+
+
+
+async function jwtLogin(){
+
+    const response = await fetch("/api/jwt-login/", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            username:document.getElementById("jwtUser").value,
+            password:document.getElementById("jwtPass").value
+        })
+    });
+
+    const data = await response.json();
+
+    show(data);
+
+    if(data.access){
+        document.getElementById("accessToken").value=data.access;
+    }
+
+    if(data.refresh){
+        document.getElementById("refreshToken").value=data.refresh;
+    }
+}
+
+
+async function jwtGetTasks(){
+
+    const token=document.getElementById("accessToken").value.trim();
+
+    const response=await fetch("/api/tasks/",{
+        headers:{
+            "Authorization":"Bearer "+token
+        }
+    });
+
+    const data=await response.json();
+
+    show(data);
+}
+
+</script>
+
+</body>
+</html>
+\n<script>\n
+async function jwtRefresh(){
+    const refresh=document.getElementById("refreshToken").value.trim();
+
+    if(!refresh){
+        show({"error":"Refresh token is required"});
+        return;
+    }
+
+    const response=await fetch("/api/jwt-refresh/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            refresh:refresh
+        })
+    });
+
+    const data=await response.json();
+    show(data);
+
+    if(data.access){
+        document.getElementById("accessToken").value=data.access;
+    }
+}
+\n</script>\n
+<script>
+
+async function jwtLogout(){
+    const refresh=document.getElementById("refreshToken").value.trim();
+
+    if(!refresh){
+        show({"error":"Refresh token is required"});
+        return;
+    }
+
+    const response=await fetch("/api/jwt-logout/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            refresh:refresh
+        })
+    });
+
+    const data=await response.json();
+    show(data);
+
+    if(response.ok){
+        clearJWT();
+    }
+}
+
+function clearJWT(){
+    document.getElementById("accessToken").value="";
+    document.getElementById("refreshToken").value="";
+    show({"message":"JWT tokens cleared"});
+}
+
+</script>
+
+<script>
+
+async function autoRefreshJWT(){
+    const refresh=document.getElementById("refreshToken").value.trim();
+
+    if(!refresh){
+        show({"error":"Refresh token is missing"});
+        return false;
+    }
+
+    const response=await fetch("/api/jwt-refresh/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            refresh:refresh
+        })
+    });
+
+    const data=await response.json();
+
+    if(data.access){
+        document.getElementById("accessToken").value=data.access;
+        return true;
+    }
+
+    show(data);
+    return false;
+}
+
+async function jwtGetTasksAuto(){
+    let token=document.getElementById("accessToken").value.trim();
+
+    if(!token){
+        show({"error":"JWT access token is missing"});
+        return;
+    }
+
+    let response=await fetch("/api/tasks/",{
+        headers:{
+            "Authorization":"Bearer "+token
+        }
+    });
+
+    if(response.status===401){
+        const refreshed=await autoRefreshJWT();
+
+        if(refreshed){
+            token=document.getElementById("accessToken").value.trim();
+
+            response=await fetch("/api/tasks/",{
+                headers:{
+                    "Authorization":"Bearer "+token
+                }
+            });
+        }
+    }
+
+    const data=await response.json();
+    show(data);
+}
+
+</script>

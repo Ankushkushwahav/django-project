@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">DjangoApp</div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/logout/">Logout</a>
+    </div>
+</nav>
+
+<section class="dashboard">
+
+    <div class="dashboard-header">
+        <span class="badge">DASHBOARD</span>
+
+        <h1>Hello, <span>{{ user.username }}</span> 👋</h1>
+
+        <p>Manage your tasks from here.</p>
+    </div>
+
+    <div class="task-form">
+        <h2>Add New Task</h2>
+
+        <form method="POST" action="{% url 'add_task' %}">
+            {% csrf_token %}
+
+            <input
+                type="text"
+                name="title"
+                placeholder="Task title"
+                required
+            >
+
+            <textarea
+                name="description"
+                placeholder="Task description"
+            ></textarea>
+
+            <button class="btn primary" type="submit">
+                + Add Task
+            </button>
+        </form>
+    </div>
+
+    <div class="tasks">
+
+        <h2>Your Tasks</h2>
+
+        {% if tasks %}
+
+            {% for task in tasks %}
+
+                <div class="task-card">
+
+                    <div>
+                        <h3 class="{% if task.completed %}completed{% endif %}">
+                            {{ task.title }}
+                        </h3>
+
+                        {% if task.description %}
+                            <p>{{ task.description }}</p>
+                        {% endif %}
+
+                        <small>
+                            {{ task.created_at|date:"d M Y, h:i A" }}
+                        </small>
+                    </div>
+
+                    <div class="task-actions">
+
+                        <a
+                            class="btn secondary"
+                            href="{% url 'complete_task' task.id %}"
+                        >
+                            {% if task.completed %}
+                                Undo
+                            {% else %}
+                                Complete
+                            {% endif %}
+                        </a>
+
+                        <a
+                            class="btn danger"
+                            href="{% url 'delete_task' task.id %}"
+                        >
+                            Delete
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                <h3>No tasks yet</h3>
+                <p>Create your first task above.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+</body>
+</html>

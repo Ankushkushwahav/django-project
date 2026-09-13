@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Django Project</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<nav>
+    <div class="logo">DjangoApp</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/admin/">Admin</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <span class="badge">DJANGO PROJECT</span>
+        <h1>Build Something <span>Amazing.</span></h1>
+        <p>
+            Welcome to your Django-powered website.
+            Your project is now running successfully on Termux.
+        </p>
+
+        <div class="buttons">
+            <a href="/admin/" class="btn primary">Admin Panel</a>
+            <a href="#about" class="btn secondary">Learn More</a>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="features">
+    <div class="card">
+        <h2>⚡ Fast</h2>
+        <p>Powered by Django and Python.</p>
+    </div>
+
+    <div class="card">
+        <h2>🔐 Secure</h2>
+        <p>Django provides powerful security features.</p>
+    </div>
+
+    <div class="card">
+        <h2>📱 Responsive</h2>
+        <p>Designed to work on mobile and desktop.</p>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 My Django Project</p>
+</footer>
+
+</body>
+</html>
